@@ -1,25 +1,24 @@
-package com.albertocamillo.slumgum
+package com.albertocamillo.slumgum.activity
 
 import android.content.Intent
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 import android.text.TextUtils
 import android.util.Log
+import android.view.View
+import android.view.WindowManager
 import android.widget.Toast
+import com.albertocamillo.slumgum.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.android.synthetic.main.activity_registration.*
 
-class RegistrationActivity:AppCompatActivity(){
-    private val TAG = this.javaClass.simpleName
+class RegistrationActivity : BaseActivity() {
+
+    private val TAG = this@RegistrationActivity.javaClass.simpleName
     private var mDatabaseReference: DatabaseReference? = null
     private var mDatabase: FirebaseDatabase? = null
     private var mAuth: FirebaseAuth? = null
-    private var firstName: String? = null
-    private var lastName: String? = null
-    private var email: String? = null
-    private var password: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,39 +32,53 @@ class RegistrationActivity:AppCompatActivity(){
         mDatabase = FirebaseDatabase.getInstance()
         mDatabaseReference = mDatabase?.reference?.child("Users")
         mAuth = FirebaseAuth.getInstance()
-        btn_register.setOnClickListener { createNewAccount() }
+
+        btnCreateAccount.setOnClickListener { createNewAccount() }
     }
 
     private fun createNewAccount() {
-        firstName = et_first_name.text.toString()
-        lastName = et_last_name.text.toString()
-        email = et_email.text.toString()
-        password = et_password.text.toString()
+
+        val firstName = etFirstName.text.toString()
+        val lastName = etLastName.text.toString()
+        val email = etEmail.text.toString()
+        val password = etPassword.text.toString()
+
+        hideKeyboard()
 
         if (!TextUtils.isEmpty(firstName) && !TextUtils.isEmpty(lastName)
                 && !TextUtils.isEmpty(email) && !TextUtils.isEmpty(password)) {
-            mAuth?.createUserWithEmailAndPassword(email ?: "" , password ?: "")
+
+            Log.d(TAG, "Creating user.")
+
+            showProgress()
+
+            mAuth?.createUserWithEmailAndPassword(email, password)
                     ?.addOnCompleteListener(this) { task ->
+
+                        hideProgress()
+
                         if (task.isSuccessful) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "createUserWithEmail:success")
                             val userId = mAuth?.currentUser?.uid
                             //Verify Email
                             verifyEmail()
+
                             //update user profile information
                             val currentUserDb = mDatabaseReference?.child(userId ?: "")
                             currentUserDb?.child("firstName")?.setValue(firstName)
                             currentUserDb?.child("lastName")?.setValue(lastName)
+
                             updateUserInfoAndUI()
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "createUserWithEmail:failure", task.exception)
-                            Toast.makeText(this, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show()
+                            showSnackbar(llRegistrationRoot, task.exception?.message
+                                    ?: getString(R.string.general_error))
                         }
                     }
         } else {
-            Toast.makeText(this, "Enter all details", Toast.LENGTH_SHORT).show()
+            showSnackbar(llRegistrationRoot, getString(R.string.enter_all_details))
         }
     }
 
@@ -79,15 +92,28 @@ class RegistrationActivity:AppCompatActivity(){
         mUser?.sendEmailVerification()
                 ?.addOnCompleteListener(this) { task ->
                     if (task.isSuccessful) {
+                        Log.e(TAG, "sendEmailVerification:success")
                         Toast.makeText(this,
-                                "Verification email sent to " + mUser.email,
+                                String.format(getString(R.string.verification_email_sent_success), mUser.email),
                                 Toast.LENGTH_SHORT).show()
                     } else {
-                        Log.e(TAG, "sendEmailVerification", task.exception)
+                        Log.e(TAG, "sendEmailVerification:failure", task.exception)
                         Toast.makeText(this,
-                                "Failed to send verification email.",
+                                getString(R.string.verification_email_sent_error),
                                 Toast.LENGTH_SHORT).show()
                     }
                 }
+    }
+
+    private fun showProgress() {
+        window.setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
+        btnCreateAccount.visibility = View.GONE
+        pbRegistration.visibility = View.VISIBLE
+    }
+
+    private fun hideProgress() {
+        window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
+        btnCreateAccount.visibility = View.VISIBLE
+        pbRegistration.visibility = View.GONE
     }
 }

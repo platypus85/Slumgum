@@ -1,35 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/llLoginRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="20dp">
+    android:padding="@dimen/general_layout_margin">
     <EditText
-        android:id="@+id/et_email"
+        android:id="@+id/etEmail"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
         android:hint="@string/email"
         android:inputType="textEmailAddress" />
     <EditText
-        android:id="@+id/et_password"
+        android:id="@+id/etPassword"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/et_email"
         android:ems="10"
         android:hint="@string/password"
         android:inputType="textPassword" />
     <Button
-        android:id="@+id/btn_login"
+        android:id="@+id/btnLogin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/colorAccent"
         android:text="@string/login"
         android:textColor="@android:color/white"
         android:textStyle="bold" />
+
+    <ProgressBar
+        android:id="@+id/pbLogin"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:indeterminateTint="@color/colorPrimary"
+        android:max="100"
+        android:visibility="gone" />
     <TextView
-        android:id="@+id/tv_forgot_password"
+        android:id="@+id/tvForgotPassword"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
@@ -37,14 +47,15 @@
         android:clickable="true"
         android:focusable="true"
         android:gravity="center_horizontal"
-        android:text="Forgot Password?"
+        android:text="@string/forgot_password"
         android:textSize="20sp" />
     <Button
-        android:id="@+id/btn_register_account"
+        android:id="@+id/btnCreateAccount"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/colorAccent"
-        android:text="@string/create_act"
+        android:text="@string/create_account"
         android:textColor="@android:color/white"
         android:textStyle="bold" />
+
 </LinearLayout>
