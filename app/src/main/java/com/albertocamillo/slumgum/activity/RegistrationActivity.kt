@@ -83,7 +83,9 @@ class RegistrationActivity : BaseActivity() {
     }
 
     private fun updateUserInfoAndUI() {
-        startActivity(Intent(this, MainActivity::class.java))
+        val intent = Intent(this@RegistrationActivity, MainActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        startActivity(intent)
         finish()
     }
 

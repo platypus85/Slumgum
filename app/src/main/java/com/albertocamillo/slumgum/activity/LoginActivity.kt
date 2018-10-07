@@ -80,6 +80,7 @@ class LoginActivity : BaseActivity() {
         val myIntent = Intent(this@LoginActivity, MainActivity::class.java)
         myIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         startActivity(myIntent)
+        finish()
     }
 
     private fun showProgress() {

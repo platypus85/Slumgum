@@ -33,9 +33,10 @@ class LauncherActivity : BaseActivity() {
 
     private fun checkUserExistenceAndLogin() {
         if (isUserLoggedIn()) {
-            val myIntent = Intent(this, MainActivity::class.java)
+            val myIntent = Intent(this@LauncherActivity, MainActivity::class.java)
             myIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             startActivity(myIntent)
+            finish()
         }
     }
 }
