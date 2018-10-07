@@ -22,12 +22,14 @@ class LauncherActivity : BaseActivity() {
             val myIntent = Intent(this@LauncherActivity, RegistrationActivity::class.java)
             myIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             startActivity(myIntent)
+            finish()
         }
 
         btnLogin.setOnClickListener {
             val myIntent = Intent(this@LauncherActivity, LoginActivity::class.java)
             myIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             startActivity(myIntent)
+            finish()
         }
     }
 

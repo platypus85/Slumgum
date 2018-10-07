@@ -9,13 +9,20 @@ import android.support.v7.app.ActionBarDrawerToggle
 import android.view.Menu
 import android.view.MenuItem
 import com.albertocamillo.slumgum.R
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.nav_header_main.*
 
-class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedListener {
+
+class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback {
 
     private var mDatabaseReference: DatabaseReference? = null
     private var mDatabase: FirebaseDatabase? = null
@@ -44,6 +51,18 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         mDatabase = FirebaseDatabase.getInstance()
         mDatabaseReference = mDatabase?.reference?.child("Users")
         mAuth = FirebaseAuth.getInstance()
+
+        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+        mapFragment.getMapAsync(this@MainActivity)
+    }
+
+    // Include the OnCreate() method here too, as described above.
+    override fun onMapReady(googleMap: GoogleMap) {
+        // Add a marker in Sydney, Australia,
+        // and move the map's camera to the same location.
+        val sydney = LatLng(-33.852, 151.211)
+        googleMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
+        googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
     }
 
     override fun onStart() {
