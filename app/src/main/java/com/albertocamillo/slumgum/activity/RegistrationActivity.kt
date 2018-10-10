@@ -16,7 +16,7 @@ import kotlinx.android.synthetic.main.activity_registration.*
 class RegistrationActivity : BaseActivity() {
 
     private val TAG = this@RegistrationActivity.javaClass.simpleName
-    private var mDatabaseReference: DatabaseReference? = null
+    private var mUsersDatabase: DatabaseReference? = null
     private var mDatabase: FirebaseDatabase? = null
     private var mAuth: FirebaseAuth? = null
 
@@ -30,7 +30,7 @@ class RegistrationActivity : BaseActivity() {
     private fun initialise() {
 
         mDatabase = FirebaseDatabase.getInstance()
-        mDatabaseReference = mDatabase?.reference?.child("Users")
+        mUsersDatabase = mDatabase?.reference?.child("Users")
         mAuth = FirebaseAuth.getInstance()
 
         btnCreateAccount.setOnClickListener { createNewAccount() }
@@ -65,9 +65,10 @@ class RegistrationActivity : BaseActivity() {
                             verifyEmail()
 
                             //update user profile information
-                            val currentUserDb = mDatabaseReference?.child(userId ?: "")
+                            val currentUserDb = mUsersDatabase?.child(userId ?: "")
                             currentUserDb?.child("firstName")?.setValue(firstName)
                             currentUserDb?.child("lastName")?.setValue(lastName)
+                            currentUserDb?.child("emailAddress")?.setValue(email)
 
                             updateUserInfoAndUI()
                         } else {

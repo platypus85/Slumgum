@@ -8,6 +8,7 @@ import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import com.albertocamillo.slumgum.R
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -74,6 +75,12 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             override fun onDataChange(snapshot: DataSnapshot) {
                 tvName?.text = "${snapshot.child("firstName").value as String} ${snapshot.child("lastName").value as String}".capitalize()
                 tvEmail?.text = mUser?.email
+                if (mUser?.isEmailVerified == false) {
+                    tvVerifyEmail.visibility = View.VISIBLE
+                } else {
+                    tvVerifyEmail.visibility = View.GONE
+                }
+
             }
 
             override fun onCancelled(databaseError: DatabaseError) {
@@ -139,6 +146,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         val intent = Intent(this@MainActivity, LauncherActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         startActivity(intent)
+        finish()
     }
 
     private fun logout() {
