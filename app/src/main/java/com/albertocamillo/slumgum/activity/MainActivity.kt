@@ -3,13 +3,15 @@ package com.albertocamillo.slumgum.activity
 import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.NavigationView
-import android.support.design.widget.Snackbar
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.Toast
 import com.albertocamillo.slumgum.R
+import com.albertocamillo.slumgum.data.Swarm
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -25,17 +27,24 @@ import kotlinx.android.synthetic.main.nav_header_main.*
 
 class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback {
 
-    private var mDatabaseReference: DatabaseReference? = null
+    private var mUsersDatabaseReference: DatabaseReference? = null
+    private var mSwarmsDatabaseReference: DatabaseReference? = null
     private var mDatabase: FirebaseDatabase? = null
     private var mAuth: FirebaseAuth? = null
+    private val TAG = this@MainActivity.javaClass.simpleName
+    private var mGoogleMap: GoogleMap? = null
+
+    private var mSwarmListener: ChildEventListener? = null
+
+    val swarmList = ArrayList<Swarm>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
-        fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show()
+        fab.setOnClickListener {
+            //Launch swarm creation
+            launchNewSwarmActivity()
         }
 
         val toggle = ActionBarDrawerToggle(
@@ -46,11 +55,16 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         nav_view.setNavigationItemSelectedListener(this)
 
         initialise()
+
+        firebaseListenerInit()
+
+        initSwarms()
     }
 
     private fun initialise() {
         mDatabase = FirebaseDatabase.getInstance()
-        mDatabaseReference = mDatabase?.reference?.child("Users")
+        mUsersDatabaseReference = mDatabase?.reference?.child("Users")
+        mSwarmsDatabaseReference = mDatabase?.reference?.child("swarms")
         mAuth = FirebaseAuth.getInstance()
 
         val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
@@ -61,15 +75,14 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
     override fun onMapReady(googleMap: GoogleMap) {
         // Add a marker in Sydney, Australia,
         // and move the map's camera to the same location.
-        val sydney = LatLng(-33.852, 151.211)
-        googleMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
-        googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+        mGoogleMap = googleMap
+        populateMap()
     }
 
     override fun onStart() {
         super.onStart()
         val mUser = mAuth?.currentUser
-        val mUserReference = mDatabaseReference?.child(mUser?.uid ?: "")
+        val mUserReference = mUsersDatabaseReference?.child(mUser?.uid ?: "")
 
         mUserReference?.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -152,5 +165,115 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
     private fun logout() {
         mAuth?.signOut()
         launchLauncher()
+    }
+
+    private fun launchNewSwarmActivity() {
+        val intent = Intent(this@MainActivity, ReportSwarmActivity::class.java)
+        startActivity(intent)
+    }
+
+    private fun firebaseListenerInit() {
+
+        val childEventListener = object : ChildEventListener {
+
+            override fun onChildAdded(dataSnapshot: DataSnapshot, previousChildName: String?) {
+                // A new swarm has been added
+                // onChildAdded() will be called for each node at the first time
+                val swarm = dataSnapshot.getValue(Swarm::class.java)
+                swarm?.let {
+                    swarmList.add(it)
+                    Log.e(TAG, "onChildAdded:" + it.description)
+
+                    val latest = swarmList[swarmList.size - 1]
+
+                    //Update map
+                    mGoogleMap?.let {
+                        it.addMarker(MarkerOptions().position(LatLng(latest.latitude, latest.longitude)).title(latest.description))
+                        it.moveCamera(CameraUpdateFactory.newLatLng(LatLng(latest.latitude, latest.longitude)))
+                    }
+
+                }
+
+
+            }
+
+            override fun onChildChanged(dataSnapshot: DataSnapshot, previousChildName: String?) {
+                Log.e(TAG, "onChildChanged:" + dataSnapshot.key)
+
+                // A swarm has changed
+                val swarm = dataSnapshot.getValue(Swarm::class.java)
+                Toast.makeText(this@MainActivity, "onChildChanged: " + swarm?.description, Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onChildRemoved(dataSnapshot: DataSnapshot) {
+                Log.e(TAG, "onChildRemoved:" + dataSnapshot.key)
+
+                // A swarm has been removed
+                val swarm = dataSnapshot.getValue(Swarm::class.java)
+                Toast.makeText(this@MainActivity, "onChildRemoved: " + swarm?.description, Toast.LENGTH_SHORT).show()
+                populateMap()
+            }
+
+            override fun onChildMoved(dataSnapshot: DataSnapshot, previousChildName: String?) {
+                Log.e(TAG, "onChildMoved:" + dataSnapshot.key)
+
+                // A swarm has changed position
+                val swarm = dataSnapshot.getValue(Swarm::class.java)
+                Toast.makeText(this@MainActivity, "onChildMoved: " + swarm?.description, Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                Log.e(TAG, "postswarms:onCancelled", databaseError.toException())
+                Toast.makeText(this@MainActivity, "Failed to load swarm.", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        mSwarmsDatabaseReference?.addChildEventListener(childEventListener)
+
+        // copy for removing at onStop()
+        mSwarmListener = childEventListener
+    }
+
+    private fun initSwarms() {
+        val swarmsListener = object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                swarmList.clear()
+                dataSnapshot.children.mapNotNullTo(swarmList) { it.getValue<Swarm>(Swarm::class.java) }
+                populateMap()
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                println("loadPost:onCancelled ${databaseError.toException()}")
+            }
+        }
+        mSwarmsDatabaseReference?.child("swarms")?.addListenerForSingleValueEvent(swarmsListener)
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        mSwarmListener?.let {
+            val listener = it
+            mSwarmsDatabaseReference?.removeEventListener(listener)
+        }
+
+        for (swarm in swarmList) {
+            Log.e(TAG, "listItem: " + swarm.description)
+        }
+    }
+
+    private fun populateMap() {
+        for (swarm in swarmList) {
+            //Update map
+            mGoogleMap?.let {
+                it.addMarker(MarkerOptions().position(LatLng(swarm.latitude, swarm.longitude)).title(swarm.description))
+                it.moveCamera(CameraUpdateFactory.newLatLng(LatLng(swarm.latitude, swarm.longitude)))
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        populateMap()
     }
 }

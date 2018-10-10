@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/llReportSwarm"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="@dimen/general_layout_margin">
+    <EditText
+        android:id="@+id/etSwarmDescription"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/description"
+        android:inputType="text|textMultiLine"/>
+    <Button
+        android:id="@+id/btnReportSwarm"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorAccent"
+        android:text="@string/create_account"
+        android:textColor="@android:color/white"
+        android:textStyle="bold" />
+    <ProgressBar
+        android:id="@+id/pbReportSwarm"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:indeterminateTint="@color/colorPrimary"
+        android:max="100"
+        android:visibility="gone" />
+</LinearLayout>

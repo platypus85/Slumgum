@@ -1,11 +1,25 @@
 package com.albertocamillo.slumgum.data
 
+import com.google.firebase.database.Exclude
 import java.util.*
 
-data class Swarm(var latitude: Long = 0,
-                 var longitude: Long = 0,
-                 var userId: String? = null,
-                 var description: String? = null,
-                 var dateReport: Date? = null,
-                 var collected: Boolean = false)
+data class Swarm(var latitude: Double = 0.0,
+                 var longitude: Double = 0.0,
+                 var description: String,
+                 var dateReport: Date,
+                 var collected: Boolean = false) {
+    constructor() : this(0.0, 0.0, "", Calendar.getInstance().time, false)
+
+    @Exclude
+    fun toMap(): Map<String, Any> {
+        val result = HashMap<String, Any>()
+        result["latitude"] = latitude
+        result["longitude"] = longitude
+        result["description"] = description
+        result["dateReport"] = dateReport
+        result["collected"] = collected
+
+        return result
+    }
+}
 

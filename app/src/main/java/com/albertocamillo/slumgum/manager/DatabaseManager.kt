@@ -16,7 +16,6 @@ class DatabaseManager{
             getSwarmCollection().add(mapOf(
                     "latitude" to swarm.latitude,
                     "longitude" to swarm.longitude,
-                    "userId" to swarm.userId,
                     "description" to swarm.description,
                     "dateReport" to swarm.dateReport,
                     "collected" to swarm.collected
