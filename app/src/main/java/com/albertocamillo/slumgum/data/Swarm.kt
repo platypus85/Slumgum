@@ -7,8 +7,9 @@ data class Swarm(var latitude: Double = 0.0,
                  var longitude: Double = 0.0,
                  var description: String,
                  var dateReport: Date,
-                 var collected: Boolean = false) {
-    constructor() : this(0.0, 0.0, "", Calendar.getInstance().time, false)
+                 var collected: Boolean = false,
+                 var photoUrl: String = "") {
+    constructor() : this(0.0, 0.0, "", Calendar.getInstance().time, false, "")
 
     @Exclude
     fun toMap(): Map<String, Any> {
@@ -18,7 +19,7 @@ data class Swarm(var latitude: Double = 0.0,
         result["description"] = description
         result["dateReport"] = dateReport
         result["collected"] = collected
-
+        result["photoUrl"] = photoUrl
         return result
     }
 }
