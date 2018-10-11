@@ -8,6 +8,7 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.Toast
 import com.albertocamillo.slumgum.R
+import com.albertocamillo.slumgum.manager.DatabaseManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
@@ -30,7 +31,7 @@ class RegistrationActivity : BaseActivity() {
     private fun initialise() {
 
         mDatabase = FirebaseDatabase.getInstance()
-        mUsersDatabase = mDatabase?.reference?.child("Users")
+        mUsersDatabase = mDatabase?.reference?.child(DatabaseManager.Table.USERS.tableName)
         mAuth = FirebaseAuth.getInstance()
 
         btnCreateAccount.setOnClickListener { createNewAccount() }
