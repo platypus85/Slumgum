@@ -75,12 +75,12 @@ class RegistrationActivity : BaseActivity() {
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "createUserWithEmail:failure", task.exception)
-                            showSnackbar(llRegistrationRoot, task.exception?.message
+                            showLongSnackbar(llRegistrationRoot, task.exception?.message
                                     ?: getString(R.string.general_error))
                         }
                     }
         } else {
-            showSnackbar(llRegistrationRoot, getString(R.string.enter_all_details))
+            showLongSnackbar(llRegistrationRoot, getString(R.string.enter_all_details))
         }
     }
 

@@ -67,12 +67,12 @@ class LoginActivity : BaseActivity() {
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.e(TAG, "signInWithEmail:failure", task.exception)
-                            showSnackbar(llLoginRoot, task.exception?.message
+                            showLongSnackbar(llLoginRoot, task.exception?.message
                                     ?: getString(R.string.authentication_failed))
                         }
                     }
         } else {
-            showSnackbar(llLoginRoot, getString(R.string.enter_all_details))
+            showLongSnackbar(llLoginRoot, getString(R.string.enter_all_details))
         }
     }
 

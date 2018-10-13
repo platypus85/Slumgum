@@ -9,6 +9,9 @@ import android.text.TextUtils
 import android.widget.Toast
 import com.albertocamillo.slumgum.R
 import com.albertocamillo.slumgum.data.Swarm
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DatabaseReference
@@ -20,7 +23,7 @@ import java.io.IOException
 import java.util.*
 
 
-class ReportSwarmActivity : BaseActivity() {
+class ReportSwarmActivity : BaseActivity(), OnMapReadyCallback {
 
     private var user: FirebaseUser? = null
     private var mDatabase: DatabaseReference? = null
@@ -30,6 +33,7 @@ class ReportSwarmActivity : BaseActivity() {
     //Firebase
     var storage: FirebaseStorage? = null
     var storageReference: StorageReference? = null
+    private var mGoogleMap: GoogleMap? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,6 +43,9 @@ class ReportSwarmActivity : BaseActivity() {
 
         mDatabase = FirebaseDatabase.getInstance().reference
         user = FirebaseAuth.getInstance().currentUser
+
+        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+        mapFragment.getMapAsync(this@ReportSwarmActivity)
 
         btnReportSwarm.setOnClickListener {
             reportSwarm()
@@ -62,7 +69,10 @@ class ReportSwarmActivity : BaseActivity() {
     }
 
     private fun writeNewMessage(description: String, downloadUrl: String = "") {
-        val swarm = Swarm(-34.035011, 151.063294, description, Calendar.getInstance().time, false, downloadUrl)
+        mGoogleMap?.cameraPosition?.target
+        val swarm = Swarm(mGoogleMap?.cameraPosition?.target?.latitude
+                ?: 0.0, mGoogleMap?.cameraPosition?.target?.longitude
+                ?: 0.0, description, Calendar.getInstance().time, false, downloadUrl)
         val swarmValues = swarm.toMap()
         val childUpdates = HashMap<String, Any>()
 
@@ -111,5 +121,12 @@ class ReportSwarmActivity : BaseActivity() {
                 val progress = 100.0 * taskSnapshot.bytesTransferred / taskSnapshot.totalByteCount
             }
         } ?: writeNewMessage(description)
+    }
+
+    override fun onMapReady(googleMap: GoogleMap?) {
+        googleMap?.let {
+            mGoogleMap = it
+            centerMapOnUser(it)
+        }
     }
 }

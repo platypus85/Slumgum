@@ -7,7 +7,7 @@
     <string name="nav_header_title">John Smith</string>
     <string name="nav_header_subtitle">john@smith.me</string>
     <string name="nav_header_desc">Navigation header</string>
-    <string name="action_settings">Settings</string>
+    <string name="action_refresh">Refresh</string>
 
     <!-- EDIT TEXTS -->
     <string name="first_name">First name</string>
@@ -33,5 +33,7 @@
     <string name="reset_email_sent_success">Email sent. Please check your inbox to reset the password.</string>
     <string name="reset_email_sent_failed">No user found with this email address.</string>
     <string name="verify_your_email">Please, verify your email address. Check your inbox!</string>
+    <string name="connection_unavailable">Connection not available, please try again later.</string>
+    <string name="loading_swarms">Loading swarms…</string>
 
 </resources>

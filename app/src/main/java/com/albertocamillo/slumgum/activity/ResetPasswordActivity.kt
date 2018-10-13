@@ -53,12 +53,12 @@ class ResetPasswordActivity: BaseActivity(){
                             updateUI()
                         } else {
                             Log.w(TAG, task.exception?.message)
-                            showSnackbar(llResetPasswordRoot, task.exception?.message
+                            showLongSnackbar(llResetPasswordRoot, task.exception?.message
                                     ?: getString(R.string.reset_email_sent_failed))
                         }
                     }
         } else {
-            showSnackbar(llResetPasswordRoot, getString(R.string.enter_all_details))
+            showLongSnackbar(llResetPasswordRoot, getString(R.string.enter_all_details))
         }
     }
 

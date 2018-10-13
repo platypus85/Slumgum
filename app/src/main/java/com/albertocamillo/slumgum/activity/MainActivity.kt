@@ -4,13 +4,13 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.support.design.widget.NavigationView
-import android.support.v4.app.ActivityCompat
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.Toast
 import com.albertocamillo.slumgum.R
 import com.albertocamillo.slumgum.data.Swarm
 import com.albertocamillo.slumgum.manager.DatabaseManager
@@ -65,17 +65,12 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         mapFragment.getMapAsync(this@MainActivity)
     }
 
-    // Include the OnCreate() method here too, as described above.
-    override fun onMapReady(googleMap: GoogleMap) {
-        mGoogleMap = googleMap
-
-        loadSwarms()
-
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return
+    override fun onMapReady(googleMap: GoogleMap?) {
+        googleMap?.let {
+            mGoogleMap = it
+            loadSwarms()
+            centerMapOnUser(it)
         }
-
-        googleMap.isMyLocationEnabled = true
     }
 
     override fun onStart() {
@@ -102,7 +97,11 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
-            R.id.action_settings -> true
+            R.id.action_settings -> {
+                showShortToast(getString(R.string.loading_swarms))
+                loadSwarms()
+                return true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -210,5 +209,25 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
     override fun onResume() {
         super.onResume()
         loadUser()
+        loadSwarms()
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+
+        when (requestCode) {
+            LOCATION_REQUEST_CODE -> {
+
+                if (grantResults.isEmpty() || grantResults[0] !=
+                        PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(this,
+                            "Unable to show location - permission required",
+                            Toast.LENGTH_LONG).show()
+                } else {
+
+                    val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+                    mapFragment.getMapAsync(this)
+                }
+            }
+        }
     }
 }
